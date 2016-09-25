@@ -1,7 +1,6 @@
-# require  'byebug'
-
 class PageGuage
   attr_accessor :queries, :pages
+  IDENTIFIERS = {page: 'P', query: 'Q'}
 
   def initialize(raw_str, max_weight)
     @unprocessed_str = raw_str
@@ -58,19 +57,23 @@ class PageGuage
       in_process_str.delete_at(index) if str.nil? || str.empty?
     end
 
-    return split_entities(in_process_str, 'P'), split_entities(in_process_str, 'Q')
+    return split_entities(in_process_str)
   end
 
-  def split_entities(str_arr, identifier)
-    entities  = []
-    identifier = identifier.upcase
+  def split_entities(str_arr)
+    page, query = [], []
+    pid, qid = IDENTIFIERS[:page], IDENTIFIERS[:query]
 
     str_arr.each_with_index do |str, ix|
-      if str.strip.start_with?(identifier)
-        entities << str.gsub(/^\s*#{identifier}\s/, '').strip.split
+      str.strip!
+
+      if str.start_with?(pid)
+        page << str.gsub(/^\s*#{pid}\s/, '').strip.split
+      elsif str.start_with?(qid)
+        query << str.gsub(/^\s*#{qid}\s/, '').strip.split
       end
     end
 
-    entities
+    [page, query]
   end
 end
